@@ -1,0 +1,54 @@
+services:
+  frontend:
+    build: 
+      context: ./frontend
+    networks:
+      - jenkins-test-network
+    volumes:
+      - frontend_build:/frontend/build
+    env_file:
+      - ./frontend/.env
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    networks:
+      - jenkins-test-network
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - frontend_build:/var/www/frontend
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/degault.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - jenkins-test-network
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - jenkins-test-network
+
+networks:
+  jenkins-test-network:
+    drivers: bridge
+
+volumes:
+  - frontend_build
+  - postgres_data
