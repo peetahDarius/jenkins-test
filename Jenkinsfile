@@ -6,7 +6,7 @@ pipeline{
                 echo "========executing A========"
                 script {
                     sh '''
-                    docker-compose build
+                    docker compose build
                     '''
                 }
             }
