@@ -47,8 +47,8 @@ services:
 
 networks:
   jenkins-test-network:
-    drivers: bridge
+    driver: bridge
 
 volumes:
-  - frontend_build
-  - postgres_data
+  frontend_build:
+  postgres_data:
