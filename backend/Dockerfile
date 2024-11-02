@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /backend
 
-COPY requirements.py requirements.py
+COPY requirements.txt requirements.txt
 
 RUN pip install requirements.txt
 
