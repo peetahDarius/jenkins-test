@@ -6,7 +6,7 @@ pipeline{
                 echo "========executing A========"
                 script {
                     sh '''
-                    cd ./jenkins-test
+                    cd jenkins-test
                     docker-compose build
                     '''
                 }
