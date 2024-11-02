@@ -4,7 +4,12 @@ pipeline{
         stage("build containers"){
             steps{
                 echo "========executing A========"
-                echo "hellooo there. starting execution!"
+                script {
+                    sh '''
+                    cd ./jenkins-test
+                    docker-compose build
+                    '''
+                }
             }
             post{
                 always{
@@ -12,7 +17,7 @@ pipeline{
                     echo "post execution!"
                 }
                 success{
-                    echo "========A executed successfully========"
+                    echo "========A executed successfully !========"
                 }
                 failure{
                     echo "========A execution failed========"
