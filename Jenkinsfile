@@ -4,6 +4,7 @@ pipeline{
         stage("build containers"){
             steps{
                 echo "========executing A========"
+                echo "hellooo"
             }
             post{
                 always{
