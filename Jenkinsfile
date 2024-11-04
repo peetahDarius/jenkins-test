@@ -11,9 +11,9 @@ pipeline {
             }
         }
         stage("Build Release Containers") {
-            when {
-                expression { env.BRANCH_NAME.startsWith('origin/release-') }
-            }
+            // when {
+            //     expression { env.BRANCH_NAME.startsWith('origin/release-') }
+            // }
             steps {
                 echo "========executing build========"
                 script {
@@ -36,9 +36,9 @@ pipeline {
             }
         }
         stage("Push Containers to Docker Hub") {
-            when {
-                expression { env.BRANCH_NAME.startsWith('origin/release-') }
-            }
+            // when {
+            //     expression { env.BRANCH_NAME.startsWith('origin/release-') }
+            // }
             steps {
                 echo "========executing push to Docker Hub========"
                 // Add your Docker push commands here
