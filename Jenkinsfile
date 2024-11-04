@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+    }
     stages {
         stage("build release containers") {
             when {
