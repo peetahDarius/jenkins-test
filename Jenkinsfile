@@ -1,10 +1,9 @@
 pipeline {
     agent any
     environment {
-        // Initialize BRANCH_NAME here for use in all stages
+        // Retrieve Docker Hub credentials as a single variable
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub') // Use Jenkins credentials
         BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-        DOCKER_HUB_USERNAME = credentials('dockerhub') // Use Jenkins credentials
-        DOCKER_HUB_PASSWORD = credentials('dockerhub') // Use Jenkins credentials
     }
     stages {
         stage("Prepare") {
@@ -48,7 +47,14 @@ pipeline {
         stage("Login to Docker Hub") {
             steps {
                 script {
-                    sh "echo $DOCKER_HUB_PASSWORD | docker login -u $DOCKER_HUB_USERNAME --password-stdin"
+                    // Access the username and password from the credentials
+                    def username = "${DOCKER_HUB_CREDENTIALS_USR}"
+                    def password = "${DOCKER_HUB_CREDENTIALS_PSW}"
+
+                    // Securely login to Docker Hub without exposing credentials
+                    sh '''
+                    echo "${password}" | docker login -u "${username}" --password-stdin
+                    '''
                 }
             }
         }
