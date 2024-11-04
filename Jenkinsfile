@@ -1,10 +1,14 @@
 pipeline {
     agent any
-    environment {
-        BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-    }
     stages {
         stage("build release containers") {
+            steps {
+                script {
+                    // Retrieve BRANCH_NAME dynamically
+                    env.BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    echo "Branch Name: ${env.BRANCH_NAME}"
+                }
+            }
             when {
                 expression { env.BRANCH_NAME.startsWith('release-') }
             }
@@ -30,6 +34,13 @@ pipeline {
             }
         }
         stage("pushing containers to dockerhub") {
+            steps {
+                script {
+                    // Retrieve BRANCH_NAME dynamically again if needed
+                    env.BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                    echo "Branch Name: ${env.BRANCH_NAME}"
+                }
+            }
             when {
                 expression { env.BRANCH_NAME.startsWith('release-') }
             }
