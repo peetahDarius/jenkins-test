@@ -1,7 +1,7 @@
 pipeline{
     agent any
     stages{
-        stage("build containers"){
+        stage("build release containers"){
             when {
                 expression { env.GIT_BRANCH.startsWith('release-') }
             }
