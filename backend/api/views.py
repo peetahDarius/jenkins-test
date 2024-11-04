@@ -1,3 +1,5 @@
+import os
+import subprocess
 from django.shortcuts import render
 from django.contrib.auth.models import User
 import requests
@@ -20,9 +22,19 @@ class CreateUserView(generics.CreateAPIView):
     
 
 @api_view(http_method_names=["GET"])
-@permission_classes([AllowAny, ])
+@permission_classes([IsAuthenticated, ])
 def check_for_updates(request:Request):
     try:
+        try:
+            fnd_version = Version.objects.get(custom_id=1).frontend_version
+            bnd_version = Version.objects.get(custom_id=1).backend_version
+            current_frontend_version = fnd_version.replace(".", "")
+            current_backend_version = bnd_version.replace(".", "")
+            
+        except Version.DoesNotExist:
+            current_frontend_version = "1.0.0"
+            current_backend_version = "1.0.0"
+            
         frontend_repository_name = "peetahdarius/jenkins-test-frontend"
         backend_repository_name = "peetahdarius/jenkins-test-backend"
         
@@ -35,26 +47,43 @@ def check_for_updates(request:Request):
         backend_response = requests.get(backend_tags_url)
         backend_tags = backend_response.json()["results"]
         
-        curent_frontend_version = Version.objects.get(custom_id=1).frontend_version.replace(".", "")
-        curent_backend_version = Version.objects.get(custom_id=1).backend_version.replace(".", "")
-        
-        new_version = None
+        new_version = ""
         
         for tag in frontend_tags:
             string_tag_version = tag["name"]
             int_tag_version = string_tag_version.replace(".", "")
-            if int_tag_version > curent_frontend_version:
+            if int_tag_version > current_frontend_version:
                 new_version = string_tag_version
+                break
         
         for tag in backend_tags:
             string_tag_version = tag["name"]
             int_tag_version = string_tag_version.replace(".", "")
-            if int_tag_version > curent_backend_version:
+            if int_tag_version > current_backend_version:
                 new_version = string_tag_version
-        
-        if new_version is None:
+                break
+            
+        if new_version == "":
             return Response({"detail": "You are up to date"}, status=status.HTTP_404_NOT_FOUND)
         else:
-            return Response({"detail": f"You are using version {curent_frontend_version}.A new update v.{new_version} is found"})
+            return Response({"new_version": new_version, "current_version": current_frontend_version}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({"error": f"{e}"})
+    
+    
+@api_view(http_method_names=["POST"])
+@permission_classes([IsAuthenticated, ])
+def update_system(request:Request):
+    update =  request.data.get("update")
+    new_version = request.data.get("new_version")
+    print(new_version)
+    if not update:
+        return Response({"error": "cannot update application"}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        update_script_url=os.environ.get("ROOT_PATH") + "update.sh"
+        subprocess.run(["bash", update_script_url, new_version ], check=True)
+        
+    except subprocess.CalledProcessError as e:
+        print("Script failed with return code:", e.returncode)
+        
+    return Response(status=status.HTTP_201_CREATED)
