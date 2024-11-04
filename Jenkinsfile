@@ -1,11 +1,11 @@
-pipeline{
+pipeline {
     agent any
-    stages{
-        stage("build release containers"){
+    stages {
+        stage("build release containers") {
             when {
-                expression { env.GIT_BRANCH.startsWith('release-') }
+                expression { env.BRANCH_NAME.startsWith('release-') }
             }
-            steps{
+            steps {
                 echo "========executing A========"
                 script {
                     sh '''
@@ -13,47 +13,47 @@ pipeline{
                     '''
                 }
             }
-            post{
-                always{
+            post {
+                always {
                     echo "========always========"
                     echo "post execution!."
                 }
-                success{
+                success {
                     echo "========A executed successfully !========"
                 }
-                failure{
+                failure {
                     echo "========A execution failed========"
                 }
             }
         }
-        stage("pushing containers to dockerhub"){
+        stage("pushing containers to dockerhub") {
             when {
-                expression { env.GIT_BRANCH.startsWith('release-') }
+                expression { env.BRANCH_NAME.startsWith('release-') }
             }
-            steps{
+            steps {
                 echo "========executing A========"
             }
-            post{
-                always{
+            post {
+                always {
                     echo "========always========"
                 }
-                success{
+                success {
                     echo "========A executed successfully========"
                 }
-                failure{
+                failure {
                     echo "========A execution failed========"
                 }
             }
         }
     }
-    post{
-        always{
+    post {
+        always {
             echo "========always========"
         }
-        success{
+        success {
             echo "========pipeline executed successfully ========"
         }
-        failure{
+        failure {
             echo "========pipeline execution failed========"
         }
     }
