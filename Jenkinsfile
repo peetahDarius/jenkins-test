@@ -47,13 +47,9 @@ pipeline {
         stage("Login to Docker Hub") {
             steps {
                 script {
-                    // Access the username and password from the credentials
-                    def username = "${DOCKER_HUB_CREDENTIALS_USR}"
-                    def password = "${DOCKER_HUB_CREDENTIALS_PSW}"
-
                     // Securely login to Docker Hub without exposing credentials
                     sh '''
-                    echo "${password}" | docker login -u "${username}" --password-stdin
+                    echo "${DOCKER_HUB_CREDENTIALS_PSW}" | docker login -u "${DOCKER_HUB_CREDENTIALS_USR}" --password-stdin
                     '''
                 }
             }
