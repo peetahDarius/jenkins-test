@@ -15,7 +15,7 @@ pipeline {
             //     expression { env.BRANCH_NAME.startsWith('origin/release-') }
             // }
             steps {
-                echo "========executing build========"
+                echo "=======executing build========"
                 script {
                     sh '''
                     docker-compose build
