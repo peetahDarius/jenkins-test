@@ -1,19 +1,21 @@
 pipeline {
     agent any
+    environment {
+        // Initialize BRANCH_NAME here for use in all stages
+        BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+    }
     stages {
-        stage("build release containers") {
+        stage("Prepare") {
             steps {
-                script {
-                    // Retrieve BRANCH_NAME dynamically
-                    env.BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                    echo "Branch Name: ${env.BRANCH_NAME}"
-                }
+                echo "Branch Name: ${env.BRANCH_NAME}"
             }
+        }
+        stage("Build Release Containers") {
             when {
                 expression { (env.BRANCH_NAME ?: env.GIT_BRANCH).startsWith('release-') }
             }
             steps {
-                echo "========executing A========"
+                echo "========executing build========"
                 script {
                     sh '''
                     docker-compose build
@@ -23,39 +25,33 @@ pipeline {
             post {
                 always {
                     echo "========always========"
-                    echo "post execution!."
+                    echo "post execution!"
                 }
                 success {
-                    echo "========A executed successfully!========"
+                    echo "========Build executed successfully!========"
                 }
                 failure {
-                    echo "========A execution failed========"
+                    echo "========Build execution failed========"
                 }
             }
         }
-        stage("pushing containers to dockerhub") {
-            steps {
-                script {
-                    // Retrieve BRANCH_NAME dynamically again if needed
-                    env.BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-                    echo "Branch Name: ${env.BRANCH_NAME}"
-                }
-            }
+        stage("Push Containers to Docker Hub") {
             when {
                 expression { (env.BRANCH_NAME ?: env.GIT_BRANCH).startsWith('release-') }
             }
             steps {
-                echo "========executing A========"
+                echo "========executing push to Docker Hub========"
+                // Add your Docker push commands here
             }
             post {
                 always {
                     echo "========always========"
                 }
                 success {
-                    echo "========A executed successfully========"
+                    echo "========Push executed successfully========"
                 }
                 failure {
-                    echo "========A execution failed========"
+                    echo "========Push execution failed========"
                 }
             }
         }
@@ -65,10 +61,10 @@ pipeline {
             echo "========always========"
         }
         success {
-            echo "========pipeline executed successfully========"
+            echo "========Pipeline executed successfully========"
         }
         failure {
-            echo "========pipeline execution failed========"
+            echo "========Pipeline execution failed========"
         }
     }
 }
