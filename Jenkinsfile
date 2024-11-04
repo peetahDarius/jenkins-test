@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage("build release containers") {
             when {
-                expression { env.BRANCH_NAME.startsWith('release-') }
+                expression { (env.BRANCH_NAME ?: env.GIT_BRANCH).startsWith('release-') }
             }
             steps {
                 echo "========executing A========"
@@ -19,7 +19,7 @@ pipeline {
                     echo "post execution!."
                 }
                 success {
-                    echo "========A executed successfully !========"
+                    echo "========A executed successfully!========"
                 }
                 failure {
                     echo "========A execution failed========"
@@ -28,7 +28,7 @@ pipeline {
         }
         stage("pushing containers to dockerhub") {
             when {
-                expression { env.BRANCH_NAME.startsWith('release-') }
+                expression { (env.BRANCH_NAME ?: env.GIT_BRANCH).startsWith('release-') }
             }
             steps {
                 echo "========executing A========"
@@ -51,7 +51,7 @@ pipeline {
             echo "========always========"
         }
         success {
-            echo "========pipeline executed successfully ========"
+            echo "========pipeline executed successfully========"
         }
         failure {
             echo "========pipeline execution failed========"
