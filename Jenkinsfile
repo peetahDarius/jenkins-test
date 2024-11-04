@@ -36,8 +36,8 @@ pipeline {
         stage("Tag Images") {
             steps {
                 script {
-                    def frontendImage = "myapp/frontend"
-                    def backendImage = "myapp/backend"
+                    def frontendImage = "peetahdarius/jenkins-test-frontend"
+                    def backendImage = "peetahdarius/jenkins-test-backend"
                     def version = "1.0.0" // or dynamic versioning
 
                     sh "docker tag ${frontendImage}:latest ${frontendImage}:${version}"
@@ -55,8 +55,8 @@ pipeline {
         stage("Push Containers to Docker Hub") {
             steps {
                 script {
-                    def frontendImage = "peetahdarius/jenkins-test/frontend"
-                    def backendImage = "peetahdarius/jenkins-test/backend"
+                    def frontendImage = "peetahdarius/jenkins-test-frontend"
+                    def backendImage = "peetahdarius/jenkins-test-backend"
                     def version = "1.0.0" // or dynamic versioning
 
                     sh "docker push ${frontendImage}:${version}"
