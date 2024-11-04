@@ -1,7 +1,20 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { IoBagHandle, IoPieChart, IoPeople, IoCart } from 'react-icons/io5'
+import api from '../api'
 
 export default function DashboardStatsGrid() {
+	useEffect(() => {
+		checkForUpdates()
+	}, [])
+
+	const checkForUpdates = async () => {
+		try {
+			const res = await api.get("api/system/updates/")
+			console.log(res.data)
+		} catch (error) {
+			console.log(error)
+		}
+	}
 	return (
 		<div className="flex gap-4">
 			<BoxWrapper>

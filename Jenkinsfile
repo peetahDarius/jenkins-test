@@ -37,7 +37,7 @@ pipeline {
                 script {
                     def frontendImage = "peetahdarius/jenkins-test-frontend"
                     def backendImage = "peetahdarius/jenkins-test-backend"
-                    def version = "1.0.0" // or dynamic versioning
+                    def version = "1.0.1" // or dynamic versioning
 
                     sh "docker tag ${frontendImage}:latest ${frontendImage}:${version}"
                     sh "docker tag ${backendImage}:latest ${backendImage}:${version}"
