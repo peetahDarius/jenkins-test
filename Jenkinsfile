@@ -12,7 +12,7 @@ pipeline {
         }
         stage("Build Release Containers") {
             when {
-                expression { env.BRANCH_NAME.startsWith('release-') }
+                expression { (env.BRANCH_NAME ?: env.GIT_BRANCH).startsWith('release-') }
             }
             steps {
                 echo "========executing build========"
@@ -37,7 +37,7 @@ pipeline {
         }
         stage("Push Containers to Docker Hub") {
             when {
-                expression { env.BRANCH_NAME.startsWith('release-') }
+                expression { (env.BRANCH_NAME ?: env.GIT_BRANCH).startsWith('release-') }
             }
             steps {
                 echo "========executing push to Docker Hub========"
