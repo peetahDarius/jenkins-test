@@ -2,6 +2,7 @@ services:
   frontend:
     build: 
       context: ./frontend
+    image: peetahdarius/jenkins-test-frontend:latest
     networks:
       - jenkins-test-network
     volumes:
@@ -11,6 +12,7 @@ services:
   backend:
     build:
       context: ./backend
+    image: peetahdarius/jenkins-test-backend:latest
     ports:
       - "8000:8000"
     networks:
