@@ -2,6 +2,9 @@ pipeline{
     agent any
     stages{
         stage("build containers"){
+            when {
+                expression { env.GIT_BRANCH.startsWith('release-') }
+            }
             steps{
                 echo "========executing A========"
                 script {
@@ -24,6 +27,9 @@ pipeline{
             }
         }
         stage("pushing containers to dockerhub"){
+            when {
+                expression { env.GIT_BRANCH.startsWith('release-') }
+            }
             steps{
                 echo "========executing A========"
             }
