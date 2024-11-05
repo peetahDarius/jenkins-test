@@ -12,6 +12,7 @@ export default function DashboardStatsGrid() {
 	}, [])
 
 	const checkForUpdates = async () => {
+		console.log("checking for updates!")
 		try {
 			const res = await api.get("api/system/updates/")
 			setNewVersion(res.data.new_version)

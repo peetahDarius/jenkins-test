@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 import requests
 from rest_framework import generics, status
 
+from backend.settings import BASE_DIR
+
 from .models import Version
 from .serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -80,8 +82,8 @@ def update_system(request:Request):
     if not update:
         return Response({"error": "cannot update application"}, status=status.HTTP_400_BAD_REQUEST)
     try:
-        update_script_url=os.environ.get("ROOT_PATH") + "update.sh"
-        subprocess.run(["bash", update_script_url, new_version ], check=True)
+        update_script_url = os.path.join(BASE_DIR, "update.sh")
+        subprocess.run([update_script_url, new_version ], check=True)
         
     except subprocess.CalledProcessError as e:
         print("Script failed with return code:", e.returncode)

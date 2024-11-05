@@ -41,4 +41,4 @@ update_database(){
     PGPASSWORD="$DATABASE_PASSWORD" psql -d "$DATABASE_NAME" -U "$DATABASE_USER" -h "$DATABASE_HOST" -p "$DATABASE_PORT" -c "$SQL1" || { echo "Database update failed"; exit 1; }
 }
 
-update_database
+# update_database
