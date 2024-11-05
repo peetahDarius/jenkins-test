@@ -84,23 +84,21 @@ def update_system(request:Request):
     if not update:
         return Response({"error": "cannot update application"}, status=status.HTTP_400_BAD_REQUEST)
     
-    frontend_container_name = f"peetahdarius/jenkins-test-frontend:{current_version}"
-    backend_container_name = f"peetahdarius/jenkins-test-backend:{current_version}"
+    frontend_image_name = f"peetahdarius/jenkins-test-frontend:{current_version}"
+    backend_image_name = f"peetahdarius/jenkins-test-backend:{current_version}"
     
     client = docker.from_env()
     
     try:
         # stoping the containers
-        try:
-            frontend_container = client.containers.get(frontend_container_name)
-            frontend_container.stop()
-            backend_container = client.containers.get(backend_container_name)
-            backend_container.stop()
+        for container in client.containers.list():
+            if container.image.tags and (
+                frontend_image_name in container.image.tags or
+                backend_image_name in container.image.tags
+            ):
+                print(f"Stopping container: {container.name} using image: {container.image.tags}")
+                container.stop()
             
-        except docker.errors.NotFound as e:
-            print(f"Container not found: {e}")
-            return Response({"error": "One or more containers not found"}, status=status.HTTP_404_NOT_FOUND)
-        
         # prune the stopped containers
         client.containers.prune()
         
