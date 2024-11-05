@@ -82,7 +82,7 @@ def update_system(request:Request):
     if not update:
         return Response({"error": "cannot update application"}, status=status.HTTP_400_BAD_REQUEST)
     try:
-        update_script_url = "/update.sh"
+        update_script_url = "update.sh"
         subprocess.run([update_script_url, new_version ], check=True)
         
     except subprocess.CalledProcessError as e:
