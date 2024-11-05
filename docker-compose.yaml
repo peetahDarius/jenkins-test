@@ -19,8 +19,6 @@ services:
       - jenkins-test-network
     env_file:
       - ./backend/.env
-    volumes:
-      - ./update.sh:/backend/update.sh
     depends_on:
       - db
   nginx:
