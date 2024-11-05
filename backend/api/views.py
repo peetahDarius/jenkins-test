@@ -2,6 +2,7 @@ import os
 import subprocess
 from django.shortcuts import render
 from django.contrib.auth.models import User
+import docker
 import requests
 from rest_framework import generics, status
 
@@ -78,14 +79,52 @@ def check_for_updates(request:Request):
 def update_system(request:Request):
     update =  request.data.get("update")
     new_version = request.data.get("new_version")
-    print(new_version)
+    current_version = request.data.get("current_version")
+    
     if not update:
         return Response({"error": "cannot update application"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    frontend_container_name = f"peetahdarius/jenkins-test-frontend:{current_version}"
+    backend_container_name = f"peetahdarius/jenkins-test-backend:{current_version}"
+    
+    client = docker.from_env()
+    
     try:
-        update_script_url = "update.sh"
-        subprocess.run([update_script_url, new_version ], check=True)
+        # stoping the containers
+        try:
+            frontend_container = client.containers.get(frontend_container_name)
+            frontend_container.stop()
+            backend_container = client.containers.get(backend_container_name)
+            backend_container.stop()
+            
+        except docker.errors.NotFound as e:
+            print(f"Container not found: {e}")
+            return Response({"error": "One or more containers not found"}, status=status.HTTP_404_NOT_FOUND)
         
+        # prune the stopped containers
+        client.containers.prune()
+        
+        # pull the new images
+        client.images.pull(f"peetahdarius/jenkins-test-frontend:{new_version}")
+        client.images.pull(f"peetahdarius/jenkins-test-backend:{new_version}")
+        
+        # Start the updated containers with docker-compose
+        subprocess.run(["docker-compose", "up", "-d"], check=True)
+        
+        # Clean up unused images and resources
+        client.images.prune()
+        
+        # updating the database
+        version = Version.objects.get(custom_id=1)
+        version.frontend_version = new_version
+        version.backend_version = new_version
+        version.save()
+        
+    except docker.errors.DockerException as e:
+        print("Docker operation failed:", e)
+        return Response({"error": "Docker operation failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except subprocess.CalledProcessError as e:
-        print("Script failed with return code:", e.returncode)
+        print("docker-compose up failed:", e)
+        return Response({"error": "docker-compose up failed"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-    return Response(status=status.HTTP_201_CREATED)
+    return Response({"message": "System updated successfully"}, status=status.HTTP_201_CREATED)

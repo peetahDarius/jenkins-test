@@ -26,7 +26,8 @@ export default function DashboardStatsGrid() {
 		try {
 			const data = {
 				update: true,
-				new_version: newVersion
+				new_version: newVersion,
+				current_version: currentVersion
 			}
 			await api.post("api/system/update/", data)
 			setIsModalVisible(false)
