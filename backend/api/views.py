@@ -91,10 +91,14 @@ def update_system(request:Request):
     
     try:
         # pull the new images
+        print("pulling both frontend and backend images...")
         client.images.pull(f"peetahdarius/jenkins-test-frontend:{new_version}")
+        print("frontend image pulled successfully...")
         client.images.pull(f"peetahdarius/jenkins-test-backend:{new_version}")
+        print("backend image pulled successfully...")
         
         # stoping the containers
+        print("stopping the present containers")
         for container in client.containers.list():
             if container.image.tags and (
                 frontend_image_name in container.image.tags or
