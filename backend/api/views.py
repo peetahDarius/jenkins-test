@@ -87,7 +87,7 @@ def update_system(request:Request):
     frontend_image_name = f"peetahdarius/jenkins-test-frontend:{current_version}"
     backend_image_name = f"peetahdarius/jenkins-test-backend:{current_version}"
     
-    client = docker.from_env()
+    client = docker.DockerClient(base_url='unix://var/run/docker.sock') 
     
     try:
         # stoping the containers
@@ -107,7 +107,57 @@ def update_system(request:Request):
         client.images.pull(f"peetahdarius/jenkins-test-backend:{new_version}")
         
         # Start the updated containers with docker-compose
-        subprocess.run(["docker-compose", "up", "-d"], check=True)
+        # Start new containers with the updated images
+        client.containers.run(
+            f"peetahdarius/jenkins-test-frontend:{new_version}",
+            name="frontend",
+            detach=True,
+            network="jenkins-test-network",
+            volumes={"frontend_build": {"bind": "/frontend/build"}},
+            environment={"ENV_VARS": "$(cat ./frontend/.env | xargs)"}
+        )
+        
+        client.containers.run(
+            f"peetahdarius/jenkins-test-backend:{new_version}",
+            name="backend",
+            detach=True,
+            network="jenkins-test-network",
+            volumes={"./backend": {"bind": "/backend"}},
+            environment={"ENV_VARS": "$(cat ./backend/.env | xargs)"},
+            ports={'8000': '8000'}
+        )
+        
+        client.containers.run(
+            "nginx:latest",
+            name="nginx",
+            detach=True,
+            network="jenkins-test-network",
+            volumes={"frontend_build": {"bind": "/var/www/frontend"}},
+            ports={'80': '80'}
+        )
+
+        client.containers.run(
+            "postgres:15",
+            name="postgres_db",
+            detach=True,
+            network="jenkins-test-network",
+            environment={
+                "POSTGRES_DB": os.environ.get("DATABASE_NAME"),
+                "POSTGRES_USER": os.environ.get("DATABASE_USER"),
+                "POSTGRES_PASSWORD": os.environ.get("DATABASE_PASSWORD")
+            },
+            volumes={"postgres_data": {"bind": "/var/lib/postgresql/data"}},
+            ports={'5432': '5432'}
+        )
+        
+        # Clean up unused Docker resources
+        client.images.prune()
+        
+        # Update version in the database (assuming Version model exists)
+        version = Version.objects.get(custom_id=1)
+        version.frontend_version = new_version
+        version.backend_version = new_version
+        version.save()
         
         # Clean up unused images and resources
         client.images.prune()

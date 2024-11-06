@@ -2,7 +2,7 @@ services:
   frontend:
     build: 
       context: ./frontend
-    image: peetahdarius/jenkins-test-frontend:latest
+    image: peetahdarius/jenkins-test-frontend:1.0.0
     networks:
       - jenkins-test-network
     volumes:
@@ -12,15 +12,13 @@ services:
   backend:
     build:
       context: ./backend
-    image: peetahdarius/jenkins-test-backend:latest
+    image: peetahdarius/jenkins-test-backend:1.0.0
     ports:
       - "8000:8000"
     networks:
       - jenkins-test-network
     env_file:
       - ./backend/.env
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - db
   nginx:
