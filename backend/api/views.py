@@ -90,6 +90,10 @@ def update_system(request:Request):
     client = docker.DockerClient(base_url='unix://var/run/docker.sock') 
     
     try:
+        # pull the new images
+        client.images.pull(f"peetahdarius/jenkins-test-frontend:{new_version}")
+        client.images.pull(f"peetahdarius/jenkins-test-backend:{new_version}")
+        
         # stoping the containers
         for container in client.containers.list():
             if container.image.tags and (
@@ -101,10 +105,6 @@ def update_system(request:Request):
             
         # prune the stopped containers
         client.containers.prune()
-        
-        # pull the new images
-        client.images.pull(f"peetahdarius/jenkins-test-frontend:{new_version}")
-        client.images.pull(f"peetahdarius/jenkins-test-backend:{new_version}")
         
         # Start the updated containers with docker-compose
         # Start new containers with the updated images
